@@ -17,9 +17,9 @@ namespace STIL.ServiceClient.ConfigurationProviders
         /// <returns>The <see cref="X509Certificate2"/> instance.</returns>
         public X509Certificate2 GetCertificateByThumbprint(string thumbprint)
         {
-            using var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            using X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
             store.Open(OpenFlags.ReadOnly);
-            var thumbprints = string.Join(",", store.Certificates.OfType<X509Certificate2>().Select(c => c.Thumbprint));
+            string thumbprints = string.Join(",", store.Certificates.OfType<X509Certificate2>().Select(c => c.Thumbprint));
             return store.Certificates
                 .Find(X509FindType.FindByThumbprint, thumbprint, validOnly: false)
                 .OfType<X509Certificate2>()

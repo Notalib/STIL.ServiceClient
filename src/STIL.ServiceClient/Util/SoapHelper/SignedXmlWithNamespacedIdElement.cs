@@ -33,7 +33,7 @@ namespace STIL.ServiceClient.Util.SoapHelper
             }
 
             // Else look for elements with an 'id' attribute with the given input (id) value
-            var idElems = XElement.Parse(document.OuterXml)
+            System.Collections.Generic.List<XElement> idElems = XElement.Parse(document.OuterXml)
                 .Descendants()
                 .Where(x => x.HasAttributes)
                 .Where(x => x.Attributes().Any(a => a.Name.LocalName.ToLowerInvariant() == "id" && a.Value == id))
@@ -46,7 +46,7 @@ namespace STIL.ServiceClient.Util.SoapHelper
                 return null!;
             }
 
-            var doc = new XmlDocument();
+            XmlDocument doc = new XmlDocument();
             doc.Load(idElems[0].CreateReader());
             return doc.DocumentElement!;
         }

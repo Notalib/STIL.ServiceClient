@@ -37,16 +37,16 @@ namespace STIL.ServiceClient.Util.SoapHelper
         /// <remarks>WARNING: Do not reformat the returned XML, as the added whitespace will break the signature.</remarks>
         public string GetSignedXml()
         {
-            var xmlDocument = new XmlDocument { PreserveWhitespace = false };
+            XmlDocument xmlDocument = new XmlDocument { PreserveWhitespace = false };
             xmlDocument.Load(_soapMessage.CreateReader(ReaderOptions.OmitDuplicateNamespaces));
 
-            var signatureGenerator = GetXmlSigner(_signingCertificate, xmlDocument);
+            SignedXml signatureGenerator = GetXmlSigner(_signingCertificate, xmlDocument);
             AddBodyReference(signatureGenerator);
             AddTimestampReference(signatureGenerator);
             AddSecurityTokenReference(_tokenId, signatureGenerator);
 
             signatureGenerator.ComputeSignature();
-            var signature = signatureGenerator.GetXml();
+            XmlElement signature = signatureGenerator.GetXml();
             AppendComputedSignature(xmlDocument, signature);
 
             return xmlDocument.OuterXml;
@@ -59,8 +59,8 @@ namespace STIL.ServiceClient.Util.SoapHelper
         /// <param name="signature">The signature to append to the unsigned SOAP message.</param>
         private static void AppendComputedSignature(XmlDocument xmlDocument, XmlElement signature)
         {
-            var validator = new SoapMessageValidator(xmlDocument);
-            var securityNode = validator.FindSecurityElement();
+            SoapMessageValidator validator = new SoapMessageValidator(xmlDocument);
+            XmlNode securityNode = validator.FindSecurityElement();
             securityNode.AppendChild(signature);
         }
 
@@ -70,7 +70,7 @@ namespace STIL.ServiceClient.Util.SoapHelper
         /// <param name="signedXml">The signed XML to add the timestamp reference to.</param>
         private static void AddTimestampReference(SignedXml signedXml)
         {
-            var timestampRef = new Reference($"#TimestampRef");
+            Reference timestampRef = new Reference($"#TimestampRef");
             timestampRef.AddTransform(new XmlDsigExcC14NTransform());
             timestampRef.DigestMethod = System.Security.Cryptography.Xml.SignedXml.XmlDsigSHA1Url;
             signedXml.AddReference(timestampRef);
@@ -82,7 +82,7 @@ namespace STIL.ServiceClient.Util.SoapHelper
         /// <param name="signedXml">The signed XML to add the body reference to.</param>
         private static void AddBodyReference(SignedXml signedXml)
         {
-            var bodyRef = new Reference("#BodyRef");
+            Reference bodyRef = new Reference("#BodyRef");
             bodyRef.AddTransform(new XmlDsigExcC14NTransform());
             bodyRef.DigestMethod = SignedXml.XmlDsigSHA1Url;
             signedXml.AddReference(bodyRef);
@@ -116,7 +116,7 @@ namespace STIL.ServiceClient.Util.SoapHelper
         private void AddSecurityTokenReference(Guid tokenId, SignedXml signedXml)
         {
             signedXml.KeyInfo = new KeyInfo();
-            var securityTokenReference = new XElement(
+            XmlElement securityTokenReference = new XElement(
                     securityWSNs + "SecurityTokenReference",
                     new XElement(
                         securityWSNs + "Reference",

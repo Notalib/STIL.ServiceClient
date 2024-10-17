@@ -53,7 +53,7 @@ namespace STIL.ServiceClient
             _signingCertificate = signingCertificate;
             _retryPolicyProvider = retryPolicyProvider;
 
-            var clientHttpHandler = new HttpClientHandler
+            HttpClientHandler clientHttpHandler = new HttpClientHandler
             {
                 ClientCertificates = { _clientCertificate },
             };
@@ -68,12 +68,12 @@ namespace STIL.ServiceClient
             where TResponse : class
             where TServiceFaultDetailer : class
         {
-            var retryHandler = _retryPolicyProvider.GetRetryPolicy();
-            var stilRequest = new SignedStilSoapMessage<TRequest>(dataRequest);
+            Polly.Retry.AsyncRetryPolicy<HttpResponseMessage> retryHandler = _retryPolicyProvider.GetRetryPolicy();
+            SignedStilSoapMessage<TRequest> stilRequest = new SignedStilSoapMessage<TRequest>(dataRequest);
 
-            var response = await retryHandler.ExecuteAsync(async () =>
+            HttpResponseMessage response = await retryHandler.ExecuteAsync(async () =>
             {
-                var signedRequest = stilRequest.GetSignedXml(_signingCertificate);
+                string signedRequest = stilRequest.GetSignedXml(_signingCertificate);
                 using (HttpRequestMessage request = new HttpRequestMessage())
                 {
                     request.Method = HttpMethod.Post;
@@ -130,9 +130,9 @@ namespace STIL.ServiceClient
                 return default;
             }
 
-            var responseText = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            string responseText = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             XDocument document = XDocument.Parse(responseText);
-            var responseTypeName = typeof(T)
+            string responseTypeName = typeof(T)
                 .GetCustomAttributes(typeof(XmlRootAttribute), true)
                 .OfType<XmlRootAttribute>()
                 .Select(attr => attr.ElementName)
@@ -148,7 +148,7 @@ namespace STIL.ServiceClient
             XmlSerializer serializer = new XmlSerializer(
                 typeof(T),
                 body.GetNamespaceOfPrefix(Version)?.NamespaceName ?? body.GetDefaultNamespace().NamespaceName);
-            using (var reader = body.CreateReader())
+            using (XmlReader reader = body.CreateReader())
             {
                 return serializer.Deserialize(reader) as T;
             }
@@ -170,12 +170,12 @@ namespace STIL.ServiceClient
                 return new FaultException(new FaultReason(response.ReasonPhrase), new FaultCode("no content found on error"), response.RequestMessage.RequestUri.AbsoluteUri);
             }
 
-            var responseText = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            using var xmlReader = XmlReader.Create(new StringReader(responseText));
-            var message = Message.CreateMessage(xmlReader, int.MaxValue, MessageVersion.Soap12WSAddressing10);
-            var msgFault = MessageFault.CreateFault(message, int.MaxValue);
+            string responseText = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            using XmlReader xmlReader = XmlReader.Create(new StringReader(responseText));
+            Message message = Message.CreateMessage(xmlReader, int.MaxValue, MessageVersion.Soap12WSAddressing10);
+            MessageFault msgFault = MessageFault.CreateFault(message, int.MaxValue);
 
-            var details = GetErrorDetails<TServiceFaultDetailer>(responseText);
+            (TServiceFaultDetailer? serviceFaultDetailer, string? errorMessage) details = GetErrorDetails<TServiceFaultDetailer>(responseText);
 
             if (details.serviceFaultDetailer != null)
             {
@@ -201,7 +201,7 @@ namespace STIL.ServiceClient
             }
 
             XmlSerializer serializer = new XmlSerializer(typeof(TServiceFaultDetailer), body.GetDefaultNamespace().NamespaceName);
-            using (var reader = body.CreateReader())
+            using (XmlReader reader = body.CreateReader())
             {
                 return (serializer.Deserialize(reader) as TServiceFaultDetailer, null);
             }
@@ -209,7 +209,7 @@ namespace STIL.ServiceClient
 
         private string BuildUrl(string methodName)
         {
-            var urlBuilder = GetBaseStringBuilder();
+            StringBuilder urlBuilder = GetBaseStringBuilder();
             urlBuilder.Append($"/{methodName}/{Version}");
             return urlBuilder.ToString();
         }
