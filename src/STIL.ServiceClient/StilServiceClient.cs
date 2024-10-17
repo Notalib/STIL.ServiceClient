@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
@@ -15,12 +14,10 @@ using System.Xml.Serialization;
 using STIL.ServiceClient.ConfigurationProviders;
 using STIL.ServiceClient.Util.SoapHelper;
 
-[assembly: InternalsVisibleTo("STIL.ServiceClient.Tests")]
-
 namespace STIL.ServiceClient
 {
     /// <inheritdoc />
-    internal class StilServiceClient : IStilServiceClient
+    public class StilServiceClient : IStilServiceClient
     {
         private const string UrlServiceAffix = "/services";
         private const string Version = "v1";
@@ -37,7 +34,7 @@ namespace STIL.ServiceClient
         /// <param name="areaAffixUrl">The area affix url, ex. /VEU.</param>
         /// <param name="clientCertificate">The http client certificate.</param>
         /// <param name="signingCertificate">The xml signing certificate.</param>
-        internal StilServiceClient(string baseUrl, string areaAffixUrl, X509Certificate2 clientCertificate, X509Certificate2 signingCertificate)
+        public StilServiceClient(string baseUrl, string areaAffixUrl, X509Certificate2 clientCertificate, X509Certificate2 signingCertificate)
             : this(baseUrl, areaAffixUrl, clientCertificate, signingCertificate, new DefaultRetryPolicyProvider())
         {
         }
@@ -50,7 +47,7 @@ namespace STIL.ServiceClient
         /// <param name="clientCertificate">The http client certificate.</param>
         /// <param name="signingCertificate">The xml signing certificate.</param>
         /// <param name="retryPolicyProvider">The retry policy provider.</param>
-        internal StilServiceClient(string baseUrl, string areaAffixUrl, X509Certificate2 clientCertificate, X509Certificate2 signingCertificate, IRetryPolicyProvider retryPolicyProvider)
+        public StilServiceClient(string baseUrl, string areaAffixUrl, X509Certificate2 clientCertificate, X509Certificate2 signingCertificate, IRetryPolicyProvider retryPolicyProvider)
         {
             _clientCertificate = clientCertificate;
             _signingCertificate = signingCertificate;
@@ -112,7 +109,7 @@ namespace STIL.ServiceClient
         /// Used for test purposes.
         /// </summary>
         /// <param name="httpClientHandler">The http client.</param>
-        internal void SetHttpClient(HttpClientHandler httpClientHandler)
+        public void SetHttpClient(HttpClientHandler httpClientHandler)
         {
             _stilHttpClient = new HttpClient(httpClientHandler);
         }

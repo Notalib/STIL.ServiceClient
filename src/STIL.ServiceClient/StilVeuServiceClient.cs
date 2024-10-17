@@ -39,7 +39,7 @@ public class StilVeuServiceClient : IStilVeuServiceClient
     /// Initializes a new instance of the <see cref="StilVeuServiceClient" /> class.
     /// </summary>
     /// <param name="stilServiceClient">The STIL service client.</param>
-    internal StilVeuServiceClient(IStilServiceClient stilServiceClient)
+    public StilVeuServiceClient(IStilServiceClient stilServiceClient)
     {
         _stilServiceClient = stilServiceClient;
     }
