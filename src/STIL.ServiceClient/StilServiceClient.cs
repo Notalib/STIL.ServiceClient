@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
@@ -15,30 +14,26 @@ using System.Xml.Serialization;
 using STIL.ServiceClient.ConfigurationProviders;
 using STIL.ServiceClient.Util.SoapHelper;
 
-[assembly: InternalsVisibleTo("STIL.ServiceClient.Tests")]
-
 namespace STIL.ServiceClient
 {
     /// <inheritdoc />
-    internal class StilServiceClient : IStilServiceClient
+    public class StilServiceClient : IStilServiceClient
     {
-        private const string UrlServiceAffix = "/services";
-        private const string Version = "v1";
-        private readonly StringBuilder _baseUrlBuilder = new();
         private readonly X509Certificate2 _clientCertificate;
         private readonly X509Certificate2 _signingCertificate;
         private readonly IRetryPolicyProvider _retryPolicyProvider;
+        private readonly IStilUrlGeneator _urlGenerator;
         private HttpClient _stilHttpClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StilServiceClient" /> class.
         /// </summary>
         /// <param name="baseUrl">The baseUrl for the SOAP services, ex. https://et.integrationsplatformen.dk.</param>
-        /// <param name="areaAffixUrl">The area affix url, ex. /VEU.</param>
+        /// <param name="urlGenerator"></param>
         /// <param name="clientCertificate">The http client certificate.</param>
         /// <param name="signingCertificate">The xml signing certificate.</param>
-        internal StilServiceClient(string baseUrl, string areaAffixUrl, X509Certificate2 clientCertificate, X509Certificate2 signingCertificate)
-            : this(baseUrl, areaAffixUrl, clientCertificate, signingCertificate, new DefaultRetryPolicyProvider())
+        public StilServiceClient(IStilUrlGeneator urlGenerator, X509Certificate2 clientCertificate, X509Certificate2 signingCertificate)
+            : this(urlGenerator, clientCertificate, signingCertificate, new DefaultRetryPolicyProvider())
         {
         }
 
@@ -46,23 +41,23 @@ namespace STIL.ServiceClient
         /// Initializes a new instance of the <see cref="StilServiceClient" /> class.
         /// </summary>
         /// <param name="baseUrl">The baseUrl for the SOAP services, ex. https://et.integrationsplatformen.dk.</param>
-        /// <param name="areaAffixUrl">The area affix url, ex. /VEU.</param>
+        /// <param name="urlGenerator"></param>
         /// <param name="clientCertificate">The http client certificate.</param>
         /// <param name="signingCertificate">The xml signing certificate.</param>
         /// <param name="retryPolicyProvider">The retry policy provider.</param>
-        internal StilServiceClient(string baseUrl, string areaAffixUrl, X509Certificate2 clientCertificate, X509Certificate2 signingCertificate, IRetryPolicyProvider retryPolicyProvider)
+        public StilServiceClient(IStilUrlGeneator urlGenerator, X509Certificate2 clientCertificate, X509Certificate2 signingCertificate, IRetryPolicyProvider retryPolicyProvider)
         {
+            _urlGenerator = urlGenerator;
             _clientCertificate = clientCertificate;
             _signingCertificate = signingCertificate;
             _retryPolicyProvider = retryPolicyProvider;
 
-            var clientHttpHandler = new HttpClientHandler
+            HttpClientHandler clientHttpHandler = new HttpClientHandler
             {
                 ClientCertificates = { _clientCertificate },
             };
 
             _stilHttpClient = new HttpClient(clientHttpHandler);
-            _baseUrlBuilder.Append(baseUrl.TrimEnd('/')).Append(UrlServiceAffix).Append(areaAffixUrl);
         }
 
         /// <inheritdoc />
@@ -71,17 +66,17 @@ namespace STIL.ServiceClient
             where TResponse : class
             where TServiceFaultDetailer : class
         {
-            var retryHandler = _retryPolicyProvider.GetRetryPolicy();
-            var stilRequest = new SignedStilSoapMessage<TRequest>(dataRequest);
+            Polly.Retry.AsyncRetryPolicy<HttpResponseMessage> retryHandler = _retryPolicyProvider.GetRetryPolicy();
+            SignedStilSoapMessage<TRequest> stilRequest = new SignedStilSoapMessage<TRequest>(dataRequest);
 
-            var response = await retryHandler.ExecuteAsync(async () =>
+            HttpResponseMessage response = await retryHandler.ExecuteAsync(async () =>
             {
-                var signedRequest = stilRequest.GetSignedXml(_signingCertificate);
+                string signedRequest = stilRequest.GetSignedXml(_signingCertificate);
                 using (HttpRequestMessage request = new HttpRequestMessage())
                 {
                     request.Method = HttpMethod.Post;
                     request.Content = new StringContent(signedRequest, Encoding.UTF8, "application/soap+xml");
-                    request.RequestUri = new Uri(BuildUrl(methodName), UriKind.RelativeOrAbsolute);
+                    request.RequestUri = _urlGenerator.Generate(methodName);
                     return await _stilHttpClient
                                .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
                                .ConfigureAwait(false)
@@ -112,7 +107,7 @@ namespace STIL.ServiceClient
         /// Used for test purposes.
         /// </summary>
         /// <param name="httpClientHandler">The http client.</param>
-        internal void SetHttpClient(HttpClientHandler httpClientHandler)
+        public void SetHttpClient(HttpClientHandler httpClientHandler)
         {
             _stilHttpClient = new HttpClient(httpClientHandler);
         }
@@ -133,9 +128,9 @@ namespace STIL.ServiceClient
                 return default;
             }
 
-            var responseText = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            string responseText = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             XDocument document = XDocument.Parse(responseText);
-            var responseTypeName = typeof(T)
+            string responseTypeName = typeof(T)
                 .GetCustomAttributes(typeof(XmlRootAttribute), true)
                 .OfType<XmlRootAttribute>()
                 .Select(attr => attr.ElementName)
@@ -150,8 +145,9 @@ namespace STIL.ServiceClient
 
             XmlSerializer serializer = new XmlSerializer(
                 typeof(T),
-                body.GetNamespaceOfPrefix(Version)?.NamespaceName ?? body.GetDefaultNamespace().NamespaceName);
-            using (var reader = body.CreateReader())
+                //body.GetNamespaceOfPrefix(Version)?.NamespaceName ??
+                body.GetDefaultNamespace().NamespaceName);
+            using (XmlReader reader = body.CreateReader())
             {
                 return serializer.Deserialize(reader) as T;
             }
@@ -173,12 +169,12 @@ namespace STIL.ServiceClient
                 return new FaultException(new FaultReason(response.ReasonPhrase), new FaultCode("no content found on error"), response.RequestMessage.RequestUri.AbsoluteUri);
             }
 
-            var responseText = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            using var xmlReader = XmlReader.Create(new StringReader(responseText));
-            var message = Message.CreateMessage(xmlReader, int.MaxValue, MessageVersion.Soap12WSAddressing10);
-            var msgFault = MessageFault.CreateFault(message, int.MaxValue);
+            string responseText = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            using XmlReader xmlReader = XmlReader.Create(new StringReader(responseText));
+            Message message = Message.CreateMessage(xmlReader, int.MaxValue, MessageVersion.Soap12WSAddressing10);
+            MessageFault msgFault = MessageFault.CreateFault(message, int.MaxValue);
 
-            var details = GetErrorDetails<TServiceFaultDetailer>(responseText);
+            (TServiceFaultDetailer? serviceFaultDetailer, string? errorMessage) details = GetErrorDetails<TServiceFaultDetailer>(responseText);
 
             if (details.serviceFaultDetailer != null)
             {
@@ -204,22 +200,10 @@ namespace STIL.ServiceClient
             }
 
             XmlSerializer serializer = new XmlSerializer(typeof(TServiceFaultDetailer), body.GetDefaultNamespace().NamespaceName);
-            using (var reader = body.CreateReader())
+            using (XmlReader reader = body.CreateReader())
             {
                 return (serializer.Deserialize(reader) as TServiceFaultDetailer, null);
             }
-        }
-
-        private string BuildUrl(string methodName)
-        {
-            var urlBuilder = GetBaseStringBuilder();
-            urlBuilder.Append($"/{methodName}/{Version}");
-            return urlBuilder.ToString();
-        }
-
-        private StringBuilder GetBaseStringBuilder()
-        {
-            return new StringBuilder(_baseUrlBuilder.ToString());
         }
     }
 }

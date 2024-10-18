@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace STIL.ServiceClient
@@ -6,7 +7,7 @@ namespace STIL.ServiceClient
     /// <summary>
     /// Internal STIL service client responsible for sending the soap request and instantiating http client.
     /// </summary>
-    internal interface IStilServiceClient
+    public interface IStilServiceClient
     {
         /// <summary>
         /// Send Soap Request method.

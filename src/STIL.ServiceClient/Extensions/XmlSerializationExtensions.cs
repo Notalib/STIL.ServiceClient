@@ -20,9 +20,9 @@ namespace STIL.SoapHelper
         /// <returns>The serialized object as an <see cref="XElement"/>.</returns>
         public static XElement Serialize<T>(this T data)
         {
-            using (var writer = new StringWriter())
+            using (StringWriter writer = new StringWriter())
             {
-                var serializer = new XmlSerializer(typeof(T));
+                XmlSerializer serializer = new XmlSerializer(typeof(T));
                 serializer.Serialize(writer, data);
                 return XElement.Parse(writer.ToString());
             }
@@ -35,7 +35,7 @@ namespace STIL.SoapHelper
         /// <returns>The <see cref="XElement"/> as an <see cref="XmlElement"/>.</returns>
         public static XmlElement ToXmlElement(this XNode element)
         {
-            var xmldoc = new XmlDocument();
+            XmlDocument xmldoc = new XmlDocument();
             xmldoc.Load(element.CreateReader());
             return xmldoc.DocumentElement;
         }

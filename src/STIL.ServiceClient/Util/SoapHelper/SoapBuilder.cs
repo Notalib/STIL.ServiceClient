@@ -42,7 +42,7 @@ namespace STIL.ServiceClient.Util.SoapHelper
         /// <returns>A document ready to be signed with the signing certificate.</returns>
         public XDocument BuildUnsignedSoapMessage(X509Certificate2 signingCertificate)
         {
-            var document = new XDocument(new XDeclaration("1.0", "utf-8", null));
+            XDocument document = new XDocument(new XDeclaration("1.0", "utf-8", null));
             AddEnvelope(document);
             TokenId = AddHeader(document, signingCertificate);
             AddBody(document);
@@ -56,7 +56,7 @@ namespace STIL.ServiceClient.Util.SoapHelper
         /// <param name="document">The document to attach the body content to.</param>
         private void AddBodyContents(XDocument document)
         {
-            var bodyElement = document.Descendants(soapenvNs + "Body").Single();
+            XElement bodyElement = document.Descendants(soapenvNs + "Body").Single();
             bodyElement.Add(
                 new XElement(_body.Serialize()));
         }
@@ -67,7 +67,7 @@ namespace STIL.ServiceClient.Util.SoapHelper
         /// <param name="document">The document to add the SOAP body element to.</param>
         private void AddBody(XDocument document)
         {
-            var envelope = document.Root;
+            XElement? envelope = document.Root;
             envelope.Add(
                 new XElement(
                     soapenvNs + "Body",
@@ -97,11 +97,11 @@ namespace STIL.ServiceClient.Util.SoapHelper
         /// <returns>A part of the identifier that identifies the signing certificate element.</returns>
         private Guid AddHeader(XDocument document, X509Certificate2 signingCertificate)
         {
-            var envelope = document.Root;
+            XElement? envelope = document.Root;
             envelope.Add(new XElement(soapenvNs + "Header"));
             AddSecurityElement(document);
             AddTimeStamp(document);
-            var tokenId = AddBinarySecurityToken(document, signingCertificate);
+            Guid tokenId = AddBinarySecurityToken(document, signingCertificate);
             return tokenId;
         }
 
@@ -113,8 +113,8 @@ namespace STIL.ServiceClient.Util.SoapHelper
         /// <returns>A part of the identifier that identifies the signing certificate element.</returns>
         private Guid AddBinarySecurityToken(XDocument document, X509Certificate2 signingCertificate)
         {
-            var id = Guid.NewGuid();
-            var secElement = document.Descendants(securityWSNs + "Security").Single();
+            Guid id = Guid.NewGuid();
+            XElement secElement = document.Descendants(securityWSNs + "Security").Single();
             secElement.Add(new XElement(
                 securityWSNs + "BinarySecurityToken",
                 new XAttribute(securityUtilNs + "Id", $"SecurityToken-{id}"),
@@ -130,9 +130,9 @@ namespace STIL.ServiceClient.Util.SoapHelper
         /// <param name="document">The document whose Header should have a timestamp element added.</param>
         private void AddTimeStamp(XDocument document)
         {
-            var secElement = document.Descendants(securityWSNs + "Security").Single();
-            var created = $"{DateTime.UtcNow:O}".Substring(0, 23) + "Z";
-            var expires = $"{DateTime.UtcNow.AddMinutes(5):O}".Substring(0, 23) + "Z";
+            XElement secElement = document.Descendants(securityWSNs + "Security").Single();
+            string created = $"{DateTime.UtcNow:O}".Substring(0, 23) + "Z";
+            string expires = $"{DateTime.UtcNow.AddMinutes(5):O}".Substring(0, 23) + "Z";
             secElement.Add(new XElement(
                 securityUtilNs + "Timestamp",
                 new XAttribute(securityUtilNs + "Id", $"TimestampRef"),
@@ -146,7 +146,7 @@ namespace STIL.ServiceClient.Util.SoapHelper
         /// <param name="document">The document to add the Security element to.</param>
         private void AddSecurityElement(XDocument document)
         {
-            var header = document.Descendants(soapenvNs + "Header").Single();
+            XElement header = document.Descendants(soapenvNs + "Header").Single();
             header.Add(
                 new XElement(
                     securityWSNs + "Security",

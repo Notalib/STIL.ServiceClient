@@ -27,10 +27,10 @@ namespace STIL.ServiceClient.Util.SoapHelper
         /// <returns>The signed xml string.</returns>
         public string GetSignedXml(X509Certificate2 signingCertificate)
         {
-            var builder = new SoapBuilder<T>(_data);
-            var unsignedSoapMessage = builder.BuildUnsignedSoapMessage(signingCertificate);
-            var signer = new SoapSigner(unsignedSoapMessage, signingCertificate, builder.TokenId);
-            var signedDocument = signer.GetSignedXml();
+            SoapBuilder<T> builder = new SoapBuilder<T>(_data);
+            System.Xml.Linq.XDocument unsignedSoapMessage = builder.BuildUnsignedSoapMessage(signingCertificate);
+            SoapSigner signer = new SoapSigner(unsignedSoapMessage, signingCertificate, builder.TokenId);
+            string signedDocument = signer.GetSignedXml();
 
             return signedDocument;
         }

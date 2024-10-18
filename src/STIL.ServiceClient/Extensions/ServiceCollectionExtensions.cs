@@ -21,12 +21,12 @@ namespace STIL.ServiceClient.Extensions
         public static IServiceCollection AddStilVeuServiceClient(this IServiceCollection services, IConfiguration configuration, ICertificateProvider? certificateProvider = null)
         {
             // Retrieve required configuration values.
-            var stilConfig = configuration.GetRequiredSection("Stil");
-            var baseUrl = stilConfig["BaseUrl"] ?? throw new ArgumentNullException("BaseUrl", "BaseUrl var not provided in the Stil configuration section.");
-            var signingCertificateThumbprint = stilConfig["SigningCertificateThumbprint"] ?? throw new ArgumentNullException("SigningCertificateThumbprint", "SigningCertificateThumbprint is as minimum required in the Stil configuration section, for using this dependency registration.");
+            IConfigurationSection stilConfig = configuration.GetRequiredSection("Stil");
+            string baseUrl = stilConfig["BaseUrl"] ?? throw new ArgumentNullException("BaseUrl", "BaseUrl var not provided in the Stil configuration section.");
+            string signingCertificateThumbprint = stilConfig["SigningCertificateThumbprint"] ?? throw new ArgumentNullException("SigningCertificateThumbprint", "SigningCertificateThumbprint is as minimum required in the Stil configuration section, for using this dependency registration.");
 
             // Retrieve optional client certificate thumbprint value.
-            var clientCertificateThumbprint = stilConfig["ClientCertificateThumbprint"];
+            string? clientCertificateThumbprint = stilConfig["ClientCertificateThumbprint"];
 
             // Add default implementation of ICertificateProvider if none is registered
             if (certificateProvider is null)
@@ -43,7 +43,7 @@ namespace STIL.ServiceClient.Extensions
                 // Only signing certificate is provided, use the single certificate constructor
                 services.AddSingleton<IStilVeuServiceClient>(sp =>
                 {
-                    var cProvider = sp.GetRequiredService<ICertificateProvider>();
+                    ICertificateProvider cProvider = sp.GetRequiredService<ICertificateProvider>();
                     return new StilVeuServiceClient(
                         baseUrl,
                         cProvider.GetCertificateByThumbprint(signingCertificateThumbprint));
@@ -54,7 +54,7 @@ namespace STIL.ServiceClient.Extensions
                 // Both certificates are provided, use the double certificate constructor
                 services.AddSingleton<IStilVeuServiceClient>(sp =>
                 {
-                    var cProvider = sp.GetRequiredService<ICertificateProvider>();
+                    ICertificateProvider cProvider = sp.GetRequiredService<ICertificateProvider>();
                     return new StilVeuServiceClient(
                         baseUrl,
                         cProvider.GetCertificateByThumbprint(clientCertificateThumbprint!),

@@ -26,17 +26,17 @@ namespace STIL.ServiceClient.Util.SoapHelper
         /// <returns>The Security element of the SOAP Header.</returns>
         public XmlNode FindSecurityElement()
         {
-            var envelopeNode = FindFirstChildElement(
+            XmlNode envelopeNode = FindFirstChildElement(
                 _xmlDocument,
                 "Envelope",
                 "Invalid XML Document",
                 "Expected a SOAP envelope as top level element");
-            var headerNode = FindFirstChildElement(
+            XmlNode headerNode = FindFirstChildElement(
                 envelopeNode,
                 "Header",
                 "Envelope element has no content",
                 "Expected a 'Header' element as first child of the 'Envelope' element");
-            var securityNode = FindFirstChildElement(
+            XmlNode securityNode = FindFirstChildElement(
                 headerNode,
                 "Security",
                 "Header element has no security element",
@@ -55,8 +55,8 @@ namespace STIL.ServiceClient.Util.SoapHelper
         /// <returns>The first child of the <paramref name="parentNode"/> <see cref="XmlNode"/>.</returns>
         private static XmlNode FindFirstChildElement(XmlNode parentNode, string childLocalName, string msgIfNull, string msgIfWrongElement)
         {
-            var node = ValidateNode(parentNode);
-            var firstChild = ValidateChildNode(node, childLocalName, msgIfNull, msgIfWrongElement);
+            XmlNode node = ValidateNode(parentNode);
+            XmlNode firstChild = ValidateChildNode(node, childLocalName, msgIfNull, msgIfWrongElement);
             return firstChild;
         }
 
@@ -87,7 +87,7 @@ namespace STIL.ServiceClient.Util.SoapHelper
         /// <exception cref="ArgumentException">Thrown if the child node is missing or of the wrong type.</exception>
         private static XmlNode ValidateChildNode(XmlNode parentNode, string childLocalName, string msgIfNull, string msgIfWrongElement)
         {
-            var childNode = parentNode.FirstChild;
+            XmlNode? childNode = parentNode.FirstChild;
             if (childNode is null)
             {
                 throw new ArgumentException(msgIfNull, nameof(parentNode));
