@@ -4,6 +4,7 @@ using System.Xml.Serialization;
 namespace STIL.ServiceClient.DTOs.SPSA.UpdateOrdreStatus;
 
 [DebuggerStepThrough]
+[XmlRoot(Namespace = "http://ipl.stil.dk/services/spsa/ordreservice/v1.0")]
 [XmlType(AnonymousType = true, Namespace = "http://ipl.stil.dk/services/spsa/ordreservice/v1.0")]
 public class UpdateOrdreStatusesRequest
 {
