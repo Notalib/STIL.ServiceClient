@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-	  <NoWarn>$(NoWarn);SYSLIB0026</NoWarn>
+    <NoWarn>$(NoWarn);SYSLIB0026</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,12 +14,12 @@
     <None Remove="Samples\HentOptagedePladser_ValidResponse.xml" />
   </ItemGroup>
 
-	<ItemGroup>
-		<Using Include="Xunit" />
-		<Using Include="Moq" />
-		<Using Include="FluentAssertions" />
-		<Using Include="System.DateTime" Alias="DT" />
-	</ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <Using Include="Moq" />
+    <Using Include="FluentAssertions" />
+    <Using Include="System.DateTime" Alias="DT" />
+  </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Samples\HentOptagedePladser_ErrorResponse_400.xml" />
