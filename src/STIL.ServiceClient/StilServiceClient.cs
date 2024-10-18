@@ -19,23 +19,21 @@ namespace STIL.ServiceClient
     /// <inheritdoc />
     public class StilServiceClient : IStilServiceClient
     {
-        private const string UrlServiceAffix = "/services";
-        private const string Version = "v1";
-        private readonly StringBuilder _baseUrlBuilder = new();
         private readonly X509Certificate2 _clientCertificate;
         private readonly X509Certificate2 _signingCertificate;
         private readonly IRetryPolicyProvider _retryPolicyProvider;
+        private readonly IStilUrlGeneator _urlGenerator;
         private HttpClient _stilHttpClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StilServiceClient" /> class.
         /// </summary>
         /// <param name="baseUrl">The baseUrl for the SOAP services, ex. https://et.integrationsplatformen.dk.</param>
-        /// <param name="areaAffixUrl">The area affix url, ex. /VEU.</param>
+        /// <param name="urlGenerator"></param>
         /// <param name="clientCertificate">The http client certificate.</param>
         /// <param name="signingCertificate">The xml signing certificate.</param>
-        public StilServiceClient(string baseUrl, string areaAffixUrl, X509Certificate2 clientCertificate, X509Certificate2 signingCertificate)
-            : this(baseUrl, areaAffixUrl, clientCertificate, signingCertificate, new DefaultRetryPolicyProvider())
+        public StilServiceClient(IStilUrlGeneator urlGenerator, X509Certificate2 clientCertificate, X509Certificate2 signingCertificate)
+            : this(urlGenerator, clientCertificate, signingCertificate, new DefaultRetryPolicyProvider())
         {
         }
 
@@ -43,12 +41,13 @@ namespace STIL.ServiceClient
         /// Initializes a new instance of the <see cref="StilServiceClient" /> class.
         /// </summary>
         /// <param name="baseUrl">The baseUrl for the SOAP services, ex. https://et.integrationsplatformen.dk.</param>
-        /// <param name="areaAffixUrl">The area affix url, ex. /VEU.</param>
+        /// <param name="urlGenerator"></param>
         /// <param name="clientCertificate">The http client certificate.</param>
         /// <param name="signingCertificate">The xml signing certificate.</param>
         /// <param name="retryPolicyProvider">The retry policy provider.</param>
-        public StilServiceClient(string baseUrl, string areaAffixUrl, X509Certificate2 clientCertificate, X509Certificate2 signingCertificate, IRetryPolicyProvider retryPolicyProvider)
+        public StilServiceClient(IStilUrlGeneator urlGenerator, X509Certificate2 clientCertificate, X509Certificate2 signingCertificate, IRetryPolicyProvider retryPolicyProvider)
         {
+            _urlGenerator = urlGenerator;
             _clientCertificate = clientCertificate;
             _signingCertificate = signingCertificate;
             _retryPolicyProvider = retryPolicyProvider;
@@ -59,7 +58,6 @@ namespace STIL.ServiceClient
             };
 
             _stilHttpClient = new HttpClient(clientHttpHandler);
-            _baseUrlBuilder.Append(baseUrl.TrimEnd('/')).Append(UrlServiceAffix).Append(areaAffixUrl);
         }
 
         /// <inheritdoc />
@@ -78,7 +76,7 @@ namespace STIL.ServiceClient
                 {
                     request.Method = HttpMethod.Post;
                     request.Content = new StringContent(signedRequest, Encoding.UTF8, "application/soap+xml");
-                    request.RequestUri = new Uri(BuildUrl(methodName), UriKind.RelativeOrAbsolute);
+                    request.RequestUri = _urlGenerator.Generate(methodName);
                     return await _stilHttpClient
                                .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
                                .ConfigureAwait(false)
@@ -147,7 +145,8 @@ namespace STIL.ServiceClient
 
             XmlSerializer serializer = new XmlSerializer(
                 typeof(T),
-                body.GetNamespaceOfPrefix(Version)?.NamespaceName ?? body.GetDefaultNamespace().NamespaceName);
+                //body.GetNamespaceOfPrefix(Version)?.NamespaceName ??
+                body.GetDefaultNamespace().NamespaceName);
             using (XmlReader reader = body.CreateReader())
             {
                 return serializer.Deserialize(reader) as T;
@@ -205,18 +204,6 @@ namespace STIL.ServiceClient
             {
                 return (serializer.Deserialize(reader) as TServiceFaultDetailer, null);
             }
-        }
-
-        private string BuildUrl(string methodName)
-        {
-            StringBuilder urlBuilder = GetBaseStringBuilder();
-            urlBuilder.Append($"/{methodName}/{Version}");
-            return urlBuilder.ToString();
-        }
-
-        private StringBuilder GetBaseStringBuilder()
-        {
-            return new StringBuilder(_baseUrlBuilder.ToString());
         }
     }
 }

@@ -21,7 +21,7 @@ public class StilVeuServiceClient : IStilVeuServiceClient
     /// <param name="clientAndSigningCertificate">The certificate used for both the http client and xml signing.</param>
     public StilVeuServiceClient(string baseUrl, X509Certificate2 clientAndSigningCertificate)
     {
-        _stilServiceClient = new StilServiceClient(baseUrl, UrlAreaAffix, clientAndSigningCertificate, clientAndSigningCertificate);
+        _stilServiceClient = new StilServiceClient(new StilVeuUrlGeneator(baseUrl), clientAndSigningCertificate, clientAndSigningCertificate);
     }
 
     /// <summary>
@@ -32,7 +32,7 @@ public class StilVeuServiceClient : IStilVeuServiceClient
     /// <param name="signingCertificate">The xml signing certificate.</param>
     public StilVeuServiceClient(string baseUrl, X509Certificate2 clientCertificate, X509Certificate2 signingCertificate)
     {
-        _stilServiceClient = new StilServiceClient(baseUrl, UrlAreaAffix, clientCertificate, signingCertificate);
+        _stilServiceClient = new StilServiceClient(new StilVeuUrlGeneator(baseUrl), clientCertificate, signingCertificate);
     }
 
     /// <summary>
