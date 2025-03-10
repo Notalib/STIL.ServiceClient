@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Xml.Serialization;
+using STIL.ServiceClient.Util.SoapHelper;
 
 namespace STIL.ServiceClient.DTOs.SPSA.GetOrdrer;
 
@@ -15,13 +17,13 @@ public class GetOrdrerQuery
 
     public GetOrdrerQuery(DateTime? from = null, DateTime? to = null)
     {
-        fromTime = from?.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'");
-        toTime = to?.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'");
+        fromTime = from?.ToSoapString();
+        toTime = to?.ToSoapString();
     }
 
     [XmlElement(IsNullable = true, Order = 0)]
-    public string fromTime { get; set; }
+    public string? fromTime { get; set; }
 
     [XmlElement(IsNullable = true, Order = 1)]
-    public string toTime { get; set; }
+    public string? toTime { get; set; }
 }
