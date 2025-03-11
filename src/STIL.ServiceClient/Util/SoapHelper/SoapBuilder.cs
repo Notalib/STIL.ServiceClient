@@ -131,8 +131,8 @@ namespace STIL.ServiceClient.Util.SoapHelper
         private void AddTimeStamp(XDocument document)
         {
             XElement secElement = document.Descendants(securityWSNs + "Security").Single();
-            string created = $"{DateTime.UtcNow:O}".Substring(0, 23) + "Z";
-            string expires = $"{DateTime.UtcNow.AddMinutes(5):O}".Substring(0, 23) + "Z";
+            string created = DateTime.UtcNow.ToSoapString();
+            string expires = DateTime.UtcNow.AddMinutes(5).ToSoapString();
             secElement.Add(new XElement(
                 securityUtilNs + "Timestamp",
                 new XAttribute(securityUtilNs + "Id", $"TimestampRef"),
