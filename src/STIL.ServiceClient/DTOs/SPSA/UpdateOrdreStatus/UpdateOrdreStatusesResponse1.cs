@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.ServiceModel;
-using System.Xml.Serialization;
 
 namespace STIL.ServiceClient.DTOs.SPSA.UpdateOrdreStatus;
 
