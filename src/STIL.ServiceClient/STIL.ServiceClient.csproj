@@ -20,11 +20,12 @@
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<PackageTags>STIL;Styrelsen for IT og Læring;SOAP client</PackageTags>
-		<PackageProjectUrl>https://github.com/PensionDanmark/STIL.ServiceClient</PackageProjectUrl>
+		<PackageProjectUrl>https://github.com/Notalib/STIL.ServiceClient</PackageProjectUrl>
 		<PackageReleaseNotes>Initial release. Not all services are supported. If you require any additional services, open a PR</PackageReleaseNotes>
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<RepositoryUrl>https://github.com/PensionDanmark/STIL.ServiceClient</RepositoryUrl>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<RepositoryUrl>https://github.com/Notalib/STIL.ServiceClient</RepositoryUrl>
 		<Description>
 			C# Service Client to interact with some of the SOAP services provided by Styrelsen for IT og Læring (STIL). Compatible with .NET Core
 		</Description>
