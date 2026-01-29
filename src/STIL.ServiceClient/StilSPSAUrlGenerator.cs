@@ -1,19 +1,18 @@
 ﻿using System;
 
-namespace STIL.ServiceClient
+namespace STIL.ServiceClient;
+
+public class StilSPSAUrlGenerator : IStilUrlGenerator
 {
-    public class StilSPSAUrlGenerator : IStilUrlGeneator
+    private readonly Uri _url;
+
+    public StilSPSAUrlGenerator(string baseUrl)
     {
-        private readonly Uri _url;
+        _url = new Uri($"{baseUrl.TrimEnd('/')}/services/SPSA/OrdreService/v1.0/");
+    }
 
-        public StilSPSAUrlGenerator(string baseUrl)
-        {
-            _url = new Uri($"{baseUrl.TrimEnd('/')}/services/SPSA/OrdreService/v1.0/");
-        }
-
-        public Uri Generate(string methodName)
-        {
-            return _url;
-        }
+    public Uri Generate(string methodName)
+    {
+        return _url;
     }
 }

@@ -70,7 +70,7 @@ namespace STIL.ServiceClient.Tests.VEU
             }
 
             // Create stil service client and set mocked http client handler.
-            var stilServiceClient = new StilServiceClient(new StilVeuUrlGeneator(_baseUrl), _clientCertificate, _signingCertificate, _retryPolicyProvider);
+            var stilServiceClient = new StilServiceClient(new StilVeuUrlGenerator(_baseUrl), _clientCertificate, _signingCertificate, _retryPolicyProvider);
             _httpClientHandlerMock.Object.ClientCertificates.Add(_clientCertificate);
             stilServiceClient.SetHttpClient(_httpClientHandlerMock.Object);
             

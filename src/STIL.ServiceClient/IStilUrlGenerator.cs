@@ -2,7 +2,7 @@
 
 namespace STIL.ServiceClient
 {
-    public interface IStilUrlGeneator
+    public interface IStilUrlGenerator
     {
         Uri Generate(string methodName);
     }
