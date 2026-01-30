@@ -2,13 +2,13 @@
 
 namespace STIL.ServiceClient
 {
-    public class StilVeuUrlGeneator : IStilUrlGeneator
+    public class StilVeuUrlGenerator : IStilUrlGenerator
     {
         private const string UrlServiceAffix = "services";
         private const string Version = "v1";
         private readonly string _baseUrl;
 
-        public StilVeuUrlGeneator(string baseUrl)
+        public StilVeuUrlGenerator(string baseUrl)
         {
             _baseUrl = baseUrl;
         }

@@ -22,7 +22,7 @@ namespace STIL.ServiceClient
         private readonly X509Certificate2 _clientCertificate;
         private readonly X509Certificate2 _signingCertificate;
         private readonly IRetryPolicyProvider _retryPolicyProvider;
-        private readonly IStilUrlGeneator _urlGenerator;
+        private readonly IStilUrlGenerator _urlGenerator;
         private HttpClient _stilHttpClient;
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace STIL.ServiceClient
         /// <param name="urlGenerator"></param>
         /// <param name="clientCertificate">The http client certificate.</param>
         /// <param name="signingCertificate">The xml signing certificate.</param>
-        public StilServiceClient(IStilUrlGeneator urlGenerator, X509Certificate2 clientCertificate, X509Certificate2 signingCertificate)
+        public StilServiceClient(IStilUrlGenerator urlGenerator, X509Certificate2 clientCertificate, X509Certificate2 signingCertificate)
             : this(urlGenerator, clientCertificate, signingCertificate, new DefaultRetryPolicyProvider())
         {
         }
@@ -45,7 +45,7 @@ namespace STIL.ServiceClient
         /// <param name="clientCertificate">The http client certificate.</param>
         /// <param name="signingCertificate">The xml signing certificate.</param>
         /// <param name="retryPolicyProvider">The retry policy provider.</param>
-        public StilServiceClient(IStilUrlGeneator urlGenerator, X509Certificate2 clientCertificate, X509Certificate2 signingCertificate, IRetryPolicyProvider retryPolicyProvider)
+        public StilServiceClient(IStilUrlGenerator urlGenerator, X509Certificate2 clientCertificate, X509Certificate2 signingCertificate, IRetryPolicyProvider retryPolicyProvider)
         {
             _urlGenerator = urlGenerator;
             _clientCertificate = clientCertificate;
