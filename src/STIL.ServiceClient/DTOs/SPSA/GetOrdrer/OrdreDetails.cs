@@ -112,4 +112,13 @@ public class OrdreDetails
 
     [XmlElement(Order = 34)]
     public DateTime senestOpdatTms { get; set; }
+
+    [XmlElement(IsNullable = true, Order = 35)]
+    public string funktionsnedsaettelse { get; set; }
+
+    [XmlElement(Order = 36)]
+    public DateTime uddannelsesStartdato { get; set; }
+
+    [XmlElement(Order = 37)]
+    public DateTime uddannelsesSlutdato { get; set; }
 }
