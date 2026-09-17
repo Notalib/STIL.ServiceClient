@@ -1,13 +1,12 @@
 name: Publish to nuget.org
 on:
+  release:
+    types: [published] # Tag the release (e.g. v1.2.1); MinVer derives the package version from that tag.
   workflow_dispatch:
-  push:
-    branches:
-      - main # Default release branch
-    paths-ignore:
-      - '**/README.md'
-      - '**/.github/**'
-      - '**/STIl.ServiceClient.Tests/**'
+    inputs:
+      version:
+        description: 'Optional version override (e.g. 1.2.1). Leave blank to use the version MinVer computes from git tags.'
+        required: false
 jobs:
   publish:
     name: build, test, pack & publish
@@ -16,20 +15,20 @@ jobs:
       PROJECT_PATH: ./src/STIL.ServiceClient/STIL.ServiceClient.csproj
       TEST_PATH: ./src/STIL.ServiceClient.Tests/STIL.ServiceClient.Tests.csproj
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v1
+      - uses: actions/checkout@v4
         with:
-          dotnet-version: 6.0.x
+          fetch-depth: 0 # MinVer needs the full history to find the version tag
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
       - name: Install dependencies
         run: dotnet restore ${{ env.PROJECT_PATH }}
       - name: Build
-        run: dotnet build ${{ env.PROJECT_PATH }} -c Release --no-restore
+        run: dotnet build ${{ env.PROJECT_PATH }} -c Release --no-restore ${{ inputs.version && format('-p:MinVerVersionOverride={0}', inputs.version) || '' }}
       - name: Test
         run: dotnet test ${{ env.TEST_PATH }} -c Release
       - name: Package
-        if: github.ref == 'refs/heads/main'
-        run: dotnet pack -c Release -o . ${{ env.PROJECT_PATH }}
+        run: dotnet pack -c Release -o . ${{ env.PROJECT_PATH }} --no-build ${{ inputs.version && format('-p:MinVerVersionOverride={0}', inputs.version) || '' }}
       - name: Publish
-        if: github.ref == 'refs/heads/main'
         run: dotnet nuget push **.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json

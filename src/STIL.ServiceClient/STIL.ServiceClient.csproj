@@ -10,7 +10,6 @@
 	</PropertyGroup>
 
 	<PropertyGroup Label="Nuget information">
-		<Version>1.2.1</Version>
 		<Authors>PensionDanmark</Authors>
 		<Owners>PensionDanmark</Owners>
 		<Copyright>Copyright © PensionDanmark 2023</Copyright>
@@ -31,6 +30,11 @@
 		<RepositoryType>git</RepositoryType>
 	</PropertyGroup>
 
+	<PropertyGroup Label="MinVer">
+		<!-- Package version is derived from the latest 'vX.Y.Z' git tag instead of being hand-maintained here. -->
+		<MinVerTagPrefix>v</MinVerTagPrefix>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<None Include="Assets\pdlogo_128x128.png" Pack="true" PackagePath="" />
 	</ItemGroup>
@@ -39,6 +43,10 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.12" />
 		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="10.0.12" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+		<PackageReference Include="MinVer" Version="8.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="Polly" Version="8.6.5" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
 			<PrivateAssets>all</PrivateAssets>
