@@ -30,6 +30,11 @@ public class SoapMessageSigner
         _xmlDocument.Load(soapMessage.CreateReader(ReaderOptions.OmitDuplicateNamespaces));
     }
 
+    /// <summary>
+    /// Adds a reference to an XML element to be included in the signature.
+    /// </summary>
+    /// <param name="reference">The id of the element to reference.</param>
+    /// <returns>The current <see cref="SoapMessageSigner"/> instance.</returns>
     public SoapMessageSigner AddReference(string reference)
     {
         _references.Add($"#{reference}");
@@ -37,6 +42,13 @@ public class SoapMessageSigner
         return this;
     }
 
+    /// <summary>
+    /// Adds a reference to an XML element to be included in the signature, using the element id built from
+    /// <paramref name="reference"/> and <paramref name="requestId"/>.
+    /// </summary>
+    /// <param name="reference">The name of the element to reference.</param>
+    /// <param name="requestId">The request identifier used to build the element's id.</param>
+    /// <returns>The current <see cref="SoapMessageSigner"/> instance.</returns>
     public SoapMessageSigner AddReference(string reference, Guid requestId)
     {
         _references.Add($"#{reference}-{requestId}");

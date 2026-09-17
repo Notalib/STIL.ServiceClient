@@ -209,6 +209,9 @@ namespace STIL.ServiceClient
             }
         }
 
+        /// <summary>
+        /// Disposes the underlying <see cref="HttpClient"/>, if it is owned by this instance.
+        /// </summary>
         public void Dispose()
         {
             if (_ownsHttpClient)
