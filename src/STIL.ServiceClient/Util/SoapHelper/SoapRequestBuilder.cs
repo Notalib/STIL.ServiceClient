@@ -14,29 +14,84 @@ namespace STIL.ServiceClient.Util.SoapHelper;
 /// <typeparam name="T">The type of the SOAP Body content.</typeparam>
 public class SoapRequestBuilder<T>
 {
+    /// <summary>
+    /// The WS-Security X.509 token profile value type used for the binary security token.
+    /// </summary>
     public const string ValueType = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3";
+
+    /// <summary>
+    /// The WS-Security encoding type used for the binary security token.
+    /// </summary>
     public const string EncodingType = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary";
 
+    /// <summary>
+    /// The XML namespace prefix used for the XML Schema instance namespace.
+    /// </summary>
     public const string XMLSchemaInstance = "xsi";
+
+    /// <summary>
+    /// The XML Schema instance namespace.
+    /// </summary>
     public static readonly XNamespace XMLSchemaInstanceNamespace = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
 
+    /// <summary>
+    /// The XML namespace prefix used for the XML Schema namespace.
+    /// </summary>
     public const string XMLSchema = "xsd";
+
+    /// <summary>
+    /// The XML Schema namespace.
+    /// </summary>
     public static readonly XNamespace XMLSchemaNamespace = XNamespace.Get("http://www.w3.org/2001/XMLSchema");
 
+    /// <summary>
+    /// The XML namespace prefix used for the SOAP envelope namespace.
+    /// </summary>
     public const string SoapEnvelope = "soap";
+
+    /// <summary>
+    /// The SOAP envelope namespace.
+    /// </summary>
     public static readonly XNamespace SoapEnvelopeNamespace = XNamespace.Get("http://www.w3.org/2003/05/soap-envelope");
 
+    /// <summary>
+    /// The XML namespace prefix used for the WS-Security utility namespace.
+    /// </summary>
     public const string WSSecurityUtility = "wsu";
+
+    /// <summary>
+    /// The WS-Security utility namespace, used for element ids and the timestamp header.
+    /// </summary>
     public static readonly XNamespace WSSecurityUtilityNamespace = XNamespace.Get("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
 
+    /// <summary>
+    /// The XML namespace prefix used for the WS-Security extension namespace.
+    /// </summary>
     public const string WsSecuritySecExt = "wsse";
 
+    /// <summary>
+    /// The WS-Security extension namespace, used for the Security header and binary security token.
+    /// </summary>
     public static readonly XNamespace WSSecuritySecExtNamespace = XNamespace.Get("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd");
 
+    /// <summary>
+    /// The XML namespace prefix used for the BPI namespace.
+    /// </summary>
     public const string BPI = "bpi";
+
+    /// <summary>
+    /// The BPI namespace, used for the UdbydersystemId header required by STIL BPI services.
+    /// </summary>
     public static readonly XNamespace BPINamespace = XNamespace.Get("https://brugerdatabasen.stil.dk/bpi/common/3");
 
+    /// <summary>
+    /// The XML namespace prefix used for the WS-Addressing namespace.
+    /// </summary>
     public const string WSAdressing = "wsa";
+
+    /// <summary>
+    /// The WS-Addressing namespace, used for the Action and MessageID headers.
+    /// </summary>
     public static readonly XNamespace WSAdressingNamespace = XNamespace.Get("http://www.w3.org/2005/08/addressing");
 
     private readonly XDocument _document;
@@ -113,6 +168,7 @@ public class SoapRequestBuilder<T>
     /// Adds the SOAP Body element.
     /// </summary>
     /// <param name="requestObject">Object representing the actual request.</param>
+    /// <returns>SoapRequestBuilder with the SOAP Body element added.</returns>
     public SoapRequestBuilder<T> AddBody(T requestObject)
     {
         XElement bodyElement = new XElement(

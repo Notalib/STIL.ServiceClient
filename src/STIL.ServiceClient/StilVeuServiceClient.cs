@@ -42,6 +42,12 @@ public class StilVeuServiceClient : IStilVeuServiceClient
         _soapServiceClient = new SoapServiceClient(clientCertificate);
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StilVeuServiceClient" /> class.
+    /// </summary>
+    /// <param name="baseUrl">The baseUrl for the SOAP services, ex. https://et.integrationsplatformen.dk.</param>
+    /// <param name="soapServiceClient">The client used to send SOAP requests and parse the responses.</param>
+    /// <param name="signingCertificate">The xml signing certificate.</param>
     public StilVeuServiceClient(string baseUrl, ISoapServiceClient soapServiceClient, X509Certificate2 signingCertificate)
     {
         _baseUrl = baseUrl;
