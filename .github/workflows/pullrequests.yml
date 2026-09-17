@@ -16,9 +16,9 @@ jobs:
       PROJECT_PATH: ./src/STIL.ServiceClient/STIL.ServiceClient.csproj
       TEST_PATH: ./src/STIL.ServiceClient.Tests/STIL.ServiceClient.Tests.csproj
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
       - name: Install dependencies
