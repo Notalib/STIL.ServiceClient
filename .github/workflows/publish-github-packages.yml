@@ -1,4 +1,4 @@
-name: Publish to nuget.org
+name: Publish to GitHub Packages
 on:
   release:
     types: [published] # Tag the release (e.g. v1.2.1); MinVer derives the package version from that tag.
@@ -7,6 +7,9 @@ on:
       version:
         description: 'Optional version override (e.g. 1.2.1). Leave blank to use the version MinVer computes from git tags.'
         required: false
+permissions:
+  contents: read
+  packages: write
 jobs:
   publish:
     name: build, test, pack & publish
@@ -30,5 +33,7 @@ jobs:
         run: dotnet test ${{ env.TEST_PATH }} -c Release
       - name: Package
         run: dotnet pack -c Release -o . ${{ env.PROJECT_PATH }} --no-build ${{ inputs.version && format('-p:MinVerVersionOverride={0}', inputs.version) || '' }}
+      - name: Add GitHub Packages source
+        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
       - name: Publish
-        run: dotnet nuget push **.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+        run: dotnet nuget push **.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source github --skip-duplicate
